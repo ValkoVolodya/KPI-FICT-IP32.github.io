@@ -1,0 +1,16 @@
+containers:
+  jekyll:
+    setup:
+      - !Alpine v3.4
+      - !Install 
+        - build-base
+        - ruby 
+        - ruby-dev
+        - libffi-dev
+      - !Sh gem install -N json jekyll
+
+commands:
+  jekyll: !Command
+    description: run jekyll command
+    container: jekyll
+    run: [jekyll]
