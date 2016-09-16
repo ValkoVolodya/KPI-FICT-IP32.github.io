@@ -11,6 +11,42 @@ containers:
 
 commands:
   jekyll: !Command
-    description: run jekyll command
+    description: Run jekyll command
     container: jekyll
     run: [jekyll]
+
+  lecture: !Command
+    description: Create a lecture template in current directory
+    container: jekyll
+    options: |
+      Usage: vagga lecture --name=<name> [--category=<category>]
+
+      Options:
+        --name <name>             Lecture title
+        --category <category>     Lecture category. If not specified then 
+                                  it is set to current dir name with `kpi_` 
+                                  prefix
+    run: |
+      # Prepare name to be displayed in filename
+      local prepared_name=$(echo "$VAGGAOPT_NAME" | sed 's/\W\+/_/g')
+      local category="$VAGGAOPT_CATEGORY"
+      if test -z "$category"
+      then
+        category="kpi_$(basename $PWD)"
+      fi
+      local filename="$(date +'%F')-$prepared_name.markdown"
+      if test -f "$filename"
+      then
+        echo "File $filename already exists" 1>&2
+        exit 1
+      fi
+      cat > "$filename" << EOF
+      ---
+      layout: post
+      title: "$VAGGAOPT_NAME"
+      date: $(date +'%F %T %z')
+      categories: $category
+      ---
+      EOF
+      echo "Lecture stub successfully created at $(echo $PWD | sed 's/\/work/PROJECT_ROOT/g')"
+        
